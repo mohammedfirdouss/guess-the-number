@@ -3,7 +3,7 @@
 ## Description
 The **Number Guessing Game** is a simple project written in Go that comes in a basic web version.
 
-In the webrsion, the computer randomly selects a number between 1 and 100, and the player must guess the number within a limited number of attempts. The allowed attempts depend on the chosen difficulty level:
+In the web version, the computer randomly selects a number between 1 and 100, and the player must guess the number within a limited number of attempts. The allowed attempts depend on the chosen difficulty level:
 
 - **Easy:** 10 chances  
 - **Medium:** 5 chances  
