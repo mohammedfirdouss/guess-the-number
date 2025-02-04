@@ -5,9 +5,9 @@ The Number Guessing Game is a simple command-line interface (CLI) game written i
 
 The number of allowed attempts depends on the chosen difficulty level:
 
-Easy: 10 chances
-Medium: 5 chances
-Hard: 3 chances
+- Easy: 10 chances
+- Medium: 5 chances
+- Hard: 3 chances
 
 As the game progresses, the user receives hints whether the secret number is higher or lower than their guess. The game concludes either when the user guesses the correct number or runs out of chances.
 
