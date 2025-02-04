@@ -1,7 +1,7 @@
 # Guess-the-number
 
 ## Description
-The **Number Guessing Game** is a simple project written in Go that comes in two flavors: a command-line interface (CLI) version and a basic web version.
+The **Number Guessing Game** is a simple project written in Go that comes in a basic web version.
 
 In both versions, the computer randomly selects a number between 1 and 100, and the player must guess the number within a limited number of attempts. The allowed attempts depend on the chosen difficulty level:
 
