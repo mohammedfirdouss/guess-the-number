@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Guess the Number</title>
+  </head>
+  <body>
+    <h1>Welcome to Guess the Number Game!</h1>
+    <p>I'm thinking of a number between 1 and 100.</p>
+    <form action="/start" method="post">
+      <p>Select difficulty:</p>
+      <input type="radio" name="difficulty" value="easy" id="easy" checked>
+      <label for="easy">Easy (10 chances)</label><br>
+      <input type="radio" name="difficulty" value="medium" id="medium">
+      <label for="medium">Medium (5 chances)</label><br>
+      <input type="radio" name="difficulty" value="hard" id="hard">
+      <label for="hard">Hard (3 chances)</label><br>
+      <input type="submit" value="Start Game">
+    </form>
+  </body>
+</html>

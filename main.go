@@ -1,89 +1,126 @@
 package main
 
 import (
-	"bufio"     
-	"fmt"       
-	"math/rand" 
-	"os"        
-	"strconv"   
-	"strings"   
-	"time"      
+	"fmt"
+	"html/template"
+	"math/rand"
+	"net/http"
+	"strconv"
+	"time"
 )
 
+var target int
+var chances int
+var attempts int
+
+var indexTmpl *template.Template
+var guessTmpl *template.Template
+
 func main() {
+	var err error
+	indexTmpl, err = template.ParseFiles("templates/index.html")
+	if err != nil {
+		panic(fmt.Sprintf("Error parsing index template: %v", err))
+	}
+
+	guessTmpl, err = template.ParseFiles("templates/guess.html")
+	if err != nil {
+		panic(fmt.Sprintf("Error parsing guess template: %v", err))
+	}
 
 	randGen := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Generate a random number between 1 and 100
-	target := randGen.Intn(100) + 1
-	fmt.Println("Debug: The target number is", target)
+	target := randGen.Intn(100) + 1 
+_ = target 
+	
+	// Register HTTP handlers
+	http.HandleFunc("/", indexHandler)
+	http.HandleFunc("/start", startHandler)
+	http.HandleFunc("/guess", guessHandler)
 
-	// Welcome message and basic rules.
-	fmt.Println("Welcome to the Number Guessing Game!")
-	fmt.Println("I'm thinking of a number between 1 and 100.")
-	fmt.Println("")
-
-	// Present difficulty options.
-	fmt.Println("Please select the difficulty level:")
-	fmt.Println("1. Easy (10 chances)")
-	fmt.Println("2. Medium (5 chances)")
-	fmt.Println("3. Hard (3 chances)")
-	fmt.Print("Enter your choice: ")
-
-	reader := bufio.NewReader(os.Stdin)
-	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
-	difficultyChoice, err := strconv.Atoi(input)
-if err != nil || difficultyChoice < 1 || difficultyChoice > 3 {
-	fmt.Println("Invalid choice. Defaulting to Medium difficulty (5 chances).")
-	difficultyChoice = 2
-}
-
-var chances int
-switch difficultyChoice {
-case 1:
-	chances = 10
-	fmt.Println("Great! You have selected the Easy difficulty level.")
-case 2:
-	chances = 5
-	fmt.Println("Great! You have selected the Medium difficulty level.")
-case 3:
-	chances = 3
-	fmt.Println("Great! You have selected the Hard difficulty level.")
-default:
-	chances = 5
-	fmt.Println("Great! You have selected the Medium difficulty level.")
+	fmt.Println("Starting server at :8080")
+	http.ListenAndServe(":8080", nil)
 }
 
 
-fmt.Printf("You have %d chances to guess the correct number.\n", chances)
-fmt.Println("Let's start the game!")
-
-// Generate a secret number between 1 and 100.
-secretNumber := rand.Intn(100) + 1
-
-attempts := 0
-for attempts < chances {
-	fmt.Print("\nEnter your guess: ")
-	guessInput, _ := reader.ReadString('\n')
-	guessInput = strings.TrimSpace(guessInput)
-	guess, err := strconv.Atoi(guessInput)
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	err := indexTmpl.Execute(w, nil)
 	if err != nil {
-		fmt.Println("Please enter a valid number.")
-		continue
-	}
-
-	attempts++
-
-	if guess == secretNumber {
-		fmt.Printf("Congratulations! You guessed the correct number in %d attempts\n", attempts)
-		return
-	} else if guess < secretNumber {
-		fmt.Printf("Incorrect! The number is greater than %d.\n", guess)
-	} else {
-		fmt.Printf("Incorrect! The number is less than %d.\n", guess)
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
 	}
 }
 
-fmt.Printf("\nYou've run out of chances. The correct number was %d.\n", secretNumber)
+func startHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	difficulty := r.FormValue("difficulty")
+	switch difficulty {
+	case "easy":
+		chances = 10
+	case "medium":
+		chances = 5
+	case "hard":
+		chances = 3
+	default:
+		chances = 5
+	}
+
+	attempts = 0
+	target = rand.Intn(100) + 1
+
+	// Redirect to the guessing page.
+	http.Redirect(w, r, "/guess", http.StatusSeeOther)
+}
+
+
+func guessHandler(w http.ResponseWriter, r *http.Request) {
+
+	type Data struct {
+		Message   string
+		Remaining int
+		GameOver  bool
+		Target    int
+	}
+
+	data := Data{
+		Remaining: chances - attempts,
+		GameOver:  false,
+	}
+
+	if r.Method == http.MethodPost {
+		guessStr := r.FormValue("guess")
+		guess, err := strconv.Atoi(guessStr)
+		if err != nil {
+			data.Message = "Please enter a valid number."
+			guessTmpl.Execute(w, data)
+			return
+		}
+
+		attempts++
+		if guess == target {
+			data.Message = fmt.Sprintf("Congratulations! You guessed the number in %d attempt(s).", attempts)
+			data.GameOver = true
+		} else if attempts >= chances {
+			data.Message = "Sorry, you've run out of chances!"
+			data.GameOver = true
+			data.Target = target
+		} else if guess < target {
+			data.Message = fmt.Sprintf("Incorrect! The number is greater than %d.", guess)
+		} else {
+			data.Message = fmt.Sprintf("Incorrect! The number is less than %d.", guess)
+		}
+
+		data.Remaining = chances - attempts
+	} else {
+		data.Message = "Make a guess!"
+	}
+
+	err := guessTmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, "Error rendering template", http.StatusInternalServerError)
+	}
 }

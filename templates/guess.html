@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Guess the Number</title>
+  </head>
+  <body>
+    <h1>Guess the Number</h1>
+    <p>{{.Message}}</p>
+    <p>You have {{.Remaining}} chance(s) remaining.</p>
+    {{if .GameOver}}
+      <p>The correct number was: {{.Target}}</p>
+      <a href="/">Play Again</a>
+    {{else}}
+      <form action="/guess" method="post">
+        <input type="text" name="guess" placeholder="Enter your guess">
+        <input type="submit" value="Guess">
+      </form>
+    {{end}}
+  </body>
+</html>
