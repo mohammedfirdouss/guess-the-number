@@ -37,6 +37,8 @@ func main() {
 	http.HandleFunc("/", indexHandler)
 	http.HandleFunc("/start", startHandler)
 	http.HandleFunc("/guess", guessHandler)
+	http.Handle("/images/", http.StripPrefix("/images/", http.FileServer(http.Dir("templates/images"))))
+
 
 	fmt.Println("Starting server at :8080")
 	http.ListenAndServe(":8080", nil)
