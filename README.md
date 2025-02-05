@@ -20,6 +20,15 @@ As the game progresses, the player receives real-time hints on whether the secre
 
 ---
 
+![Screenshot 1](https://github.com/user-attachments/assets/6a243a81-3d50-48fd-8db7-84c1724d6ed2)
+
+
+
+![Screenshot_2](https://github.com/user-attachments/assets/0ae509b3-5a84-41c8-a544-c83334c10f60)
+![Screenshot 3](https://github.com/user-attachments/assets/8cffe12a-6fdd-4943-a670-33b2daedb6a3)
+![Screenshot_4](https://github.com/user-attachments/assets/21ef05e2-8a5e-4bc5-a8ea-60a28123d5ea)
+
+
 ## Installation
 
 Ensure you have [Go installed](https://golang.org/dl/) on your machine.
