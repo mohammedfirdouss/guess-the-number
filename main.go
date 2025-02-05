@@ -31,8 +31,7 @@ func main() {
 	randGen := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Generate a random number between 1 and 100
-	target := randGen.Intn(100) + 1 
-_ = target 
+	target = randGen.Intn(100) + 1 
 	
 	// Register HTTP handlers
 	http.HandleFunc("/", indexHandler)
@@ -104,6 +103,7 @@ func guessHandler(w http.ResponseWriter, r *http.Request) {
 		if guess == target {
 			data.Message = fmt.Sprintf("Congratulations! You guessed the number in %d attempt(s).", attempts)
 			data.GameOver = true
+			data.Target = target 
 		} else if attempts >= chances {
 			data.Message = "Sorry, you've run out of chances!"
 			data.GameOver = true
