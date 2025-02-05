@@ -77,12 +77,12 @@ func startHandler(w http.ResponseWriter, r *http.Request) {
 
 
 func guessHandler(w http.ResponseWriter, r *http.Request) {
-
 	type Data struct {
 		Message   string
 		Remaining int
 		GameOver  bool
 		Target    int
+		Success   bool
 	}
 
 	data := Data{
@@ -90,12 +90,16 @@ func guessHandler(w http.ResponseWriter, r *http.Request) {
 		GameOver:  false,
 	}
 
+	// Handle POST request (making a guess)
 	if r.Method == http.MethodPost {
 		guessStr := r.FormValue("guess")
 		guess, err := strconv.Atoi(guessStr)
 		if err != nil {
 			data.Message = "Please enter a valid number."
-			guessTmpl.Execute(w, data)
+			// Only execute template if valid input is provided
+			if err := guessTmpl.Execute(w, data); err != nil {
+				http.Error(w, "Error rendering template", http.StatusInternalServerError)
+			}
 			return
 		}
 
@@ -103,7 +107,8 @@ func guessHandler(w http.ResponseWriter, r *http.Request) {
 		if guess == target {
 			data.Message = fmt.Sprintf("Congratulations! You guessed the number in %d attempt(s).", attempts)
 			data.GameOver = true
-			data.Target = target 
+			data.Target = target
+			data.Success = true
 		} else if attempts >= chances {
 			data.Message = "Sorry, you've run out of chances!"
 			data.GameOver = true
@@ -116,11 +121,12 @@ func guessHandler(w http.ResponseWriter, r *http.Request) {
 
 		data.Remaining = chances - attempts
 	} else {
+		// For GET request
 		data.Message = "Make a guess!"
 	}
 
-	err := guessTmpl.Execute(w, data)
-	if err != nil {
+	// Ensure template rendering is only done once and avoid sending headers twice
+	if err := guessTmpl.Execute(w, data); err != nil {
 		http.Error(w, "Error rendering template", http.StatusInternalServerError)
 	}
 }
